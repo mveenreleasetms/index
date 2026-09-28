@@ -58,15 +58,15 @@
   }
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
   }
   a.card {
-    display: flex; align-items: center; gap: .9rem;
+    display: flex; align-items: flex-start; gap: .9rem;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1rem;
+    padding: 1.25rem;
     text-decoration: none;
     color: var(--text);
     transition: background .15s, transform .15s;
@@ -81,11 +81,15 @@
     border: 1px solid var(--border);
   }
   .card .info { min-width: 0; }
-  .card .name { font-weight: 600; }
+  .card .name { font-weight: 600; font-size: 1.05rem; }
   .card .desc {
-    color: var(--muted); font-size: .85rem;
-    margin-top: .15rem;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: var(--muted); font-size: .9rem;
+    margin-top: .3rem;
+    display: block;
+    line-height: 1.45;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
   }
   .hidden { display: none; }
   footer {
@@ -120,13 +124,13 @@
           name: "Verlof RTMS",
           url: "https://verlofrtms20260925.osc-fr1.scalingo.io/login",
           desc: "Alles rondom verlof aanvragen, beoordelen en overzichten",
-          icon: "🛠️"
+          icon: "🏖️"
         },
         {
           name: "Bonnen",
           url: "https://bonnenlijstrtms20260925.osc-fr1.scalingo.io",
           desc: "Kosten gemaakt met een RTMS pinpas; geen btw factuur beschikbaar",
-          icon: "📊"
+          icon: "🧾"
         }
       ]
     }
