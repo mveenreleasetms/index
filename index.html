@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mveen — Startpagina</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --card: #1a1e26;
+    --card-hover: #222834;
+    --text: #e8eaed;
+    --muted: #9aa0ab;
+    --accent: #4f8cff;
+    --border: #2a303c;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --card-hover: #f0f4ff;
+      --text: #1c2027;
+      --muted: #5f6673;
+      --accent: #2f6bdd;
+      --border: #e2e6ec;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
+  }
+  header { max-width: 960px; margin: 0 auto 2rem; }
+  h1 { font-size: 1.6rem; font-weight: 700; }
+  header p { color: var(--muted); margin-top: .3rem; }
+  #search {
+    width: 100%; max-width: 360px;
+    margin-top: 1.25rem;
+    padding: .6rem .9rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text);
+    font-size: .95rem;
+    outline: none;
+  }
+  #search:focus { border-color: var(--accent); }
+  .group {
+    max-width: 960px; margin: 0 auto 2rem;
+  }
+  .group h2 {
+    font-size: .85rem; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted);
+    margin-bottom: .8rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  a.card {
+    display: flex; align-items: center; gap: .9rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    text-decoration: none;
+    color: var(--text);
+    transition: background .15s, transform .15s;
+  }
+  a.card:hover { background: var(--card-hover); transform: translateY(-2px); }
+  .icon {
+    font-size: 1.6rem; line-height: 1;
+    width: 48px; height: 48px; flex: 0 0 48px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .card .info { min-width: 0; }
+  .card .name { font-weight: 600; }
+  .card .desc {
+    color: var(--muted); font-size: .85rem;
+    margin-top: .15rem;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hidden { display: none; }
+  footer {
+    max-width: 960px; margin: 3rem auto 0;
+    color: var(--muted); font-size: .8rem;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>mveen — Startpagina</h1>
+  <p>Alle interne apps op één plek. Zoek of klik op een kaart.</p>
+  <input id="search" type="search" placeholder="Zoek een app..." autocomplete="off">
+</header>
+
+<div id="groups"></div>
+
+<footer>Interne app — toegankelijk alleen voor medewerkers via Cloudflare Access.</footer>
+
+<script>
+  // ============================================================
+  // CONFIG: pas deze lijst aan om apps toe te voegen of te wijzigen.
+  // Nieuwe app erbij? Kopieer een blokje en vul in. Klaar.
+  // ============================================================
+  const APPS = [
+    {
+      group: "Applicaties",
+      items: [
+        {
+          name: "App 1",
+          url: "https://app1.mveen.nl",
+          desc: "Korte omschrijving van app 1",
+          icon: "🛠️"
+        },
+        {
+          name: "App 2",
+          url: "https://app2.mveen.nl",
+          desc: "Korte omschrijving van app 2",
+          icon: "📊"
+        }
+      ]
+    }
+    // Nieuwe groep? Voeg hier een nieuw object toe met group + items.
+  ];
+  // ============================================================
+
+  const groupsEl = document.getElementById("groups");
+
+  APPS.forEach((group, gi) => {
+    const section = document.createElement("section");
+    section.className = "group";
+    section.dataset.group = gi;
+
+    const h2 = document.createElement("h2");
+    h2.textContent = group.group;
+    section.appendChild(h2);
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+
+    group.items.forEach((app) => {
+      const a = document.createElement("a");
+      a.className = "card";
+      a.href = app.url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.dataset.search = (app.name + " " + app.desc).toLowerCase();
+
+      const icon = document.createElement("span");
+      icon.className = "icon";
+      icon.textContent = app.icon;
+
+      const info = document.createElement("span");
+      info.className = "info";
+      const name = document.createElement("span");
+      name.className = "name";
+      name.textContent = app.name;
+      const desc = document.createElement("span");
+      desc.className = "desc";
+      desc.textContent = app.desc;
+      info.appendChild(name);
+      info.appendChild(desc);
+
+      a.appendChild(icon);
+      a.appendChild(info);
+      grid.appendChild(a);
+    });
+
+    section.appendChild(grid);
+    groupsEl.appendChild(section);
+  });
+
+  // Zoekfilter
+  document.getElementById("search").addEventListener("input", (e) => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll(".group").forEach((section) => {
+      let visible = 0;
+      section.querySelectorAll(".card").forEach((card) => {
+        const match = card.dataset.search.includes(q);
+        card.classList.toggle("hidden", !match);
+        if (match) visible++;
+      });
+      section.classList.toggle("hidden", visible === 0);
+    });
+  });
+</script>
+
+</body>
+</html>
