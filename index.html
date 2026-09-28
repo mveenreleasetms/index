@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>mveen — Startpagina</title>
+<title>ReleaseTMS — Startpagina</title>
 <style>
   :root {
     --bg: #0f1115;
@@ -102,14 +102,14 @@
 <body>
 
 <header>
-  <h1>mveen — Startpagina</h1>
+  <h1>ReleaseTMS startpagina</h1>
   <p>Alle interne apps op één plek. Zoek of klik op een kaart.</p>
   <input id="search" type="search" placeholder="Zoek een app..." autocomplete="off">
 </header>
 
 <div id="groups"></div>
 
-<footer>Interne app — toegankelijk alleen voor medewerkers via Cloudflare Access.</footer>
+<footer>Interne app — toegankelijk alleen voor medewerkers vanuit kantoor of via VPN.</footer>
 
 <script>
   // ============================================================
@@ -133,8 +133,19 @@
           icon: "🧾"
         }
       ]
+    },
+    {
+      group: "SharePoint",
+      items: [
+        {
+          name: "SharePoint — documenten",
+          url: "https://JULLIE-ORGANISATIE.sharepoint.com/sites/JULLIE-SITE",
+          desc: "TODO: plak hier de link naar jullie SharePoint-site",
+          icon: "📁"
+        }
+      ]
     }
-    // Nieuwe groep? Voeg hier een nieuw object toe met group + items.
+    // Nieuwe groep of app? Voeg hier een nieuw object toe met group + items.
   ];
   // ============================================================
 
