@@ -34,6 +34,11 @@
     padding: 2rem 1.5rem;
   }
   header { max-width: 960px; margin: 0 auto 2rem; }
+  .brand { display: flex; align-items: center; gap: 1rem; }
+  .brand img {
+    height: 64px; width: auto;
+    border-radius: 8px;
+  }
   h1 { font-size: 1.6rem; font-weight: 700; }
   header p { color: var(--muted); margin-top: .3rem; }
   #search {
@@ -102,7 +107,10 @@
 <body>
 
 <header>
-  <h1>ReleaseTMS startpagina</h1>
+  <div class="brand">
+    <img src="Logo-2011-RTMS MKB Draft.jpg" alt="ReleaseTMS logo">
+    <h1>ReleaseTMS startpagina</h1>
+  </div>
   <p>Alle interne apps op één plek. Zoek of klik op een kaart.</p>
   <input id="search" type="search" placeholder="Zoek een app..." autocomplete="off">
 </header>
