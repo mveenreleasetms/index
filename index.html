@@ -97,6 +97,28 @@
     text-overflow: unset;
   }
   .hidden { display: none; }
+  .week-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .week-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .4rem .8rem;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-size: .95rem;
+  }
+  .week-item.celebrate-today { border-color: var(--accent); }
+  .week-item .when { color: var(--muted); font-size: .85rem; }
   footer {
     max-width: 960px; margin: 3rem auto 0;
     color: var(--muted); font-size: .8rem;
@@ -183,6 +205,71 @@
   // ============================================================
 
   const groupsEl = document.getElementById("groups");
+
+  // ============================================================
+  // CONFIG: jarig of jubileum? Vul hier de datum handmatig in.
+  // type: "verjaardag" of "jubileum". Dag en maand volstaan (jaar optioneel).
+  // Voorbeelden: { naam: "Piet Jansen", datum: "03-14", type: "verjaardag" }
+  //            { naam: "Kim de Vries", datum: "2025-03-17", type: "jubileum" }
+  // ============================================================
+  const EVENTS = [
+    // { naam: "Piet Jansen", datum: "03-14", type: "verjaardag" },
+    // { naam: "Kim de Vries", datum: "03-17", type: "jubileum" }
+  ];
+  // ============================================================
+
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const DAY_NAMES = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekday = (today.getDay() + 6) % 7; // 0 = maandag
+  const monday = new Date(today.getTime() - weekday * DAY_MS);
+  const nextMonday = new Date(monday.getTime() + 7 * DAY_MS);
+
+  function eventDate(ev) {
+    const [y, m, d] = ev.datum.split("-").map(Number);
+    return y ? new Date(y, m - 1, d) : new Date(today.getFullYear(), m - 1, d);
+  }
+
+  const upcoming = EVENTS
+    .map((ev) => {
+      let date = eventDate(ev);
+      if (!ev.datum.includes("-") || ev.datum.split("-").length === 2) {
+        if (date < monday) date = new Date(date.getFullYear() + 1, date.getMonth(), date.getDate());
+      }
+      return { ...ev, date };
+    })
+    .filter((ev) => ev.date >= today && ev.date < nextMonday)
+    .sort((a, b) => a.date - b.date);
+
+  if (upcoming.length > 0) {
+    const section = document.createElement("section");
+    section.className = "group";
+    const h2 = document.createElement("h2");
+    h2.textContent = "Deze week";
+    section.appendChild(h2);
+
+    const card = document.createElement("div");
+    card.className = "week-card";
+    upcoming.forEach((ev) => {
+      const item = document.createElement("span");
+      item.className = "week-item" + (ev.date.getTime() === today.getTime() ? " celebrate-today" : "");
+      const icon = document.createElement("span");
+      icon.textContent = ev.type === "jubileum" ? "🎉" : "🎂";
+      const label = document.createElement("span");
+      label.textContent = ev.naam + (ev.type === "jubileum" ? " — werkjubileum" : " — jarig");
+      const when = document.createElement("span");
+      when.className = "when";
+      when.textContent = ev.date.getTime() === today.getTime() ? "vandaag" : DAY_NAMES[ev.date.getDay()];
+      item.appendChild(icon);
+      item.appendChild(label);
+      item.appendChild(when);
+      card.appendChild(item);
+    });
+    section.appendChild(card);
+    groupsEl.prepend(section);
+  }
 
   APPS.forEach((group, gi) => {
     const section = document.createElement("section");
