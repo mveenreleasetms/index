@@ -207,14 +207,18 @@
   const groupsEl = document.getElementById("groups");
 
   // ============================================================
-  // CONFIG: jarig of jubileum? Vul hier de datum handmatig in.
-  // type: "verjaardag" of "jubileum". Dag en maand volstaan (jaar optioneel).
-  // Voorbeelden: { naam: "Piet Jansen", datum: "03-14", type: "verjaardag" }
-  //            { naam: "Kim de Vries", datum: "2025-03-17", type: "jubileum" }
+  // CONFIG: jarig of jubileum? Vul hier de datums handmatig in.
+  // verjaardag: vul "geboortedatum" in (volledige datum, bv. "1990-03-14").
+  //   De leeftijd wordt NIET getoond, alleen dat iemand jarig is.
+  // jubileum: vul "inDienstSinds" in (volledige datum). Het aantal jaar
+  //   in dienst wordt automatisch berekend.
+  // Voorbeelden:
+  //   { naam: "Piet Jansen", type: "verjaardag", geboortedatum: "1990-03-14" },
+  //   { naam: "Kim de Vries", type: "jubileum", inDienstSinds: "2020-03-17" }
   // ============================================================
   const EVENTS = [
-    // { naam: "Piet Jansen", datum: "03-14", type: "verjaardag" },
-    // { naam: "Kim de Vries", datum: "03-17", type: "jubileum" }
+    // { naam: "Piet Jansen", type: "verjaardag", geboortedatum: "1990-03-14" },
+    // { naam: "Kim de Vries", type: "jubileum", inDienstSinds: "2020-03-17" }
   ];
   // ============================================================
 
@@ -228,18 +232,20 @@
   const nextMonday = new Date(monday.getTime() + 7 * DAY_MS);
 
   function eventDate(ev) {
-    const [y, m, d] = ev.datum.split("-").map(Number);
-    return y ? new Date(y, m - 1, d) : new Date(today.getFullYear(), m - 1, d);
+    const source = ev.type === "jubileum" ? ev.inDienstSinds : ev.geboortedatum;
+    const [y, m, d] = source.split("-").map(Number);
+    return new Date(today.getFullYear(), m - 1, d);
+  }
+
+  function yearsInService(ev) {
+    const [y, m, d] = ev.inDienstSinds.split("-").map(Number);
+    const start = new Date(y, m - 1, d);
+    const anniversary = new Date(today.getFullYear(), m - 1, d);
+    return anniversary.getFullYear() - start.getFullYear();
   }
 
   const upcoming = EVENTS
-    .map((ev) => {
-      let date = eventDate(ev);
-      if (!ev.datum.includes("-") || ev.datum.split("-").length === 2) {
-        if (date < monday) date = new Date(date.getFullYear() + 1, date.getMonth(), date.getDate());
-      }
-      return { ...ev, date };
-    })
+    .map((ev) => ({ ...ev, date: eventDate(ev) }))
     .filter((ev) => ev.date >= today && ev.date < nextMonday)
     .sort((a, b) => a.date - b.date);
 
@@ -258,7 +264,7 @@
       const icon = document.createElement("span");
       icon.textContent = ev.type === "jubileum" ? "🎉" : "🎂";
       const label = document.createElement("span");
-      label.textContent = ev.naam + (ev.type === "jubileum" ? " — werkjubileum" : " — jarig");
+      label.textContent = ev.naam + (ev.type === "jubileum" ? " — " + yearsInService(ev) + " jaar in dienst" : " — jarig");
       const when = document.createElement("span");
       when.className = "when";
       when.textContent = ev.date.getTime() === today.getTime() ? "vandaag" : DAY_NAMES[ev.date.getDay()];
