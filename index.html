@@ -41,18 +41,12 @@
   }
   h1 { font-size: 1.6rem; font-weight: 700; }
   header p { color: var(--muted); margin-top: .3rem; }
-  #search {
-    width: 100%; max-width: 360px;
-    margin-top: 1.25rem;
-    padding: .6rem .9rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--card);
-    color: var(--text);
-    font-size: .95rem;
-    outline: none;
+  #week { margin-top: 1.5rem; }
+  #week h2 {
+    font-size: .85rem; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted);
+    margin-bottom: .8rem;
   }
-  #search:focus { border-color: var(--accent); }
   .group {
     max-width: 960px; margin: 0 auto 2rem;
   }
@@ -119,6 +113,13 @@
   }
   .week-item.celebrate-today { border-color: var(--accent); }
   .week-item .when { color: var(--muted); font-size: .85rem; }
+  #week .empty {
+    color: var(--muted); font-size: .9rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+  }
   footer {
     max-width: 960px; margin: 3rem auto 0;
     color: var(--muted); font-size: .8rem;
@@ -133,8 +134,8 @@
     <img src="Logo-2011-RTMS MKB Draft.jpg" alt="ReleaseTMS logo">
     <h1>ReleaseTMS startpagina</h1>
   </div>
-  <p>Alle interne apps op één plek. Zoek of klik op een kaart.</p>
-  <input id="search" type="search" placeholder="Zoek een app..." autocomplete="off">
+  <p>Alle interne apps op één plek. Klik op een kaart.</p>
+  <div id="week"></div>
 </header>
 
 <div id="groups"></div>
@@ -249,13 +250,12 @@
     .filter((ev) => ev.date >= today && ev.date < nextMonday)
     .sort((a, b) => a.date - b.date);
 
-  if (upcoming.length > 0) {
-    const section = document.createElement("section");
-    section.className = "group";
-    const h2 = document.createElement("h2");
-    h2.textContent = "Deze week";
-    section.appendChild(h2);
+  const weekEl = document.getElementById("week");
+  const weekTitle = document.createElement("h2");
+  weekTitle.textContent = "Deze week";
+  weekEl.appendChild(weekTitle);
 
+  if (upcoming.length > 0) {
     const card = document.createElement("div");
     card.className = "week-card";
     upcoming.forEach((ev) => {
@@ -273,8 +273,12 @@
       item.appendChild(when);
       card.appendChild(item);
     });
-    section.appendChild(card);
-    groupsEl.prepend(section);
+    weekEl.appendChild(card);
+  } else {
+    const empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent = "Geen verjaardagen of jubilea deze week";
+    weekEl.appendChild(empty);
   }
 
   APPS.forEach((group, gi) => {
@@ -321,19 +325,6 @@
     groupsEl.appendChild(section);
   });
 
-  // Zoekfilter
-  document.getElementById("search").addEventListener("input", (e) => {
-    const q = e.target.value.toLowerCase();
-    document.querySelectorAll(".group").forEach((section) => {
-      let visible = 0;
-      section.querySelectorAll(".card").forEach((card) => {
-        const match = card.dataset.search.includes(q);
-        card.classList.toggle("hidden", !match);
-        if (match) visible++;
-      });
-      section.classList.toggle("hidden", visible === 0);
-    });
-  });
 </script>
 
 </body>
