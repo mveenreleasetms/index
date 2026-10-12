@@ -333,7 +333,9 @@
   }
 
   const celebrateToday = upcoming.filter((ev) => ev.date.getTime() === today.getTime());
-  if (celebrateToday.length > 0) {
+  const celebrateKey = "celebrate-seen-" + today.toISOString().slice(0, 10);
+  if (celebrateToday.length > 0 && !localStorage.getItem(celebrateKey)) {
+    try { localStorage.setItem(celebrateKey, "1"); } catch (e) {}
     const layer = document.createElement("div");
     layer.id = "celebrate-layer";
     document.body.appendChild(layer);
