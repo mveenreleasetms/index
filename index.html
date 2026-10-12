@@ -125,6 +125,25 @@
     color: var(--muted); font-size: .8rem;
     text-align: center;
   }
+  #celebrate-layer {
+    position: fixed;
+    inset: 0;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 9999;
+  }
+  @keyframes celebrate-fall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0.6; }
+  }
+  .celebrate-piece {
+    position: absolute;
+    top: -5vh;
+    font-size: 1.5rem;
+    animation: celebrate-fall linear forwards;
+  }
 </style>
 </head>
 <body>
@@ -311,6 +330,28 @@
     empty.className = "empty";
     empty.textContent = "Geen verjaardagen of jubilea deze week";
     weekEl.appendChild(empty);
+  }
+
+  const celebrateToday = upcoming.filter((ev) => ev.date.getTime() === today.getTime());
+  if (celebrateToday.length > 0) {
+    const layer = document.createElement("div");
+    layer.id = "celebrate-layer";
+    document.body.appendChild(layer);
+
+    const EMOJIS = celebrateToday.some((ev) => ev.type === "jubileum")
+      ? ["\ud83c\udf89", "\ud83e\udd73", "\ud83c\udf8a", "\u2728", "\ud83c\udf81"]
+      : ["\ud83c\udf82", "\ud83e\udd73", "\ud83c\udf89", "\u2728", "\ud83c\udf70"];
+
+    for (let i = 0; i < 40; i++) {
+      const piece = document.createElement("span");
+      piece.className = "celebrate-piece";
+      piece.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+      piece.style.left = Math.random() * 100 + "vw";
+      piece.style.animationDuration = 3 + Math.random() * 4 + "s";
+      piece.style.animationDelay = Math.random() * 2 + "s";
+      piece.style.fontSize = 1 + Math.random() * 1.5 + "rem";
+      layer.appendChild(piece);
+    }
   }
 
   APPS.forEach((group, gi) => {
