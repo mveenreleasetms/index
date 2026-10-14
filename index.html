@@ -114,37 +114,32 @@
   .week-item.celebrate-today { border-color: var(--accent); }
   .week-item .when { color: var(--muted); font-size: .85rem; }
   #leave { margin-top: 1.5rem; }
-  #leave h2 {
-    font-size: .85rem;
-    text-transform: uppercase;
-    letter-spacing: .06em; color: var(--muted);
-    margin-bottom: .8rem;
-  }
-  .leave-day {
-    display: flex;
-    align-items: baseline;
-    gap: .75rem;
-    margin-bottom: .45rem;
-    font-size: .95rem;
-  }
-  .leave-day .leave-date { color: var(--muted); font-size: .85rem; min-width: 7.5rem; }
-  .leave-day .leave-names { display: flex; flex-wrap: wrap; gap: .4rem; }
-  .leave-chip {
-    padding: .25rem .7rem;
-    border-radius: 999px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    font-size: .9rem;
-  }
-  .leave-chip.half { border-style: dashed; }
-  .leave-chip small { color: var(--muted); font-size: .78rem; }
-  #leave .empty {
-    color: var(--muted); font-size: .9rem;
+  .leave-card {
+    display: flex; align-items: flex-start; gap: .9rem;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1rem 1.25rem;
+    padding: 1.25rem;
   }
+  .leave-card .icon {
+    font-size: 1.6rem; line-height: 1;
+    width: 48px; height: 48px; flex: 0 0 48px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .leave-card .info { min-width: 0; }
+  .leave-card .name { font-weight: 600; font-size: 1.05rem; }
+  .leave-card .rows { margin-top: .4rem; }
+  .leave-row {
+    display: block;
+    color: var(--muted);
+    font-size: .9rem;
+    line-height: 1.5;
+    margin-top: .15rem;
+  }
+  .leave-row b { color: var(--text); font-weight: 600; }
   #week .empty {
     color: var(--muted); font-size: .9rem;
     background: var(--card);
@@ -195,7 +190,7 @@
 <footer>Dit zijn interne apps en alleen toegankelijk voor medewerkers vanuit kantoor of via VPN.</footer>
 
 <script>
-  const VERSION = "v1.2.0";
+  const VERSION = "v1.3.0";
   const RELEASED_AT = "2026-10-14 07:23";
 
   // ============================================================
@@ -398,46 +393,57 @@
   const LEAVE_API =
     "https://verlofrtms20260925.osc-fr1.scalingo.io/api/leave/upcoming?token=eRJ-d8c1qW9T_LJXq8aDJ9OdYRxK_pqqIScXALUV6r8";
   const leaveEl = document.getElementById("leave");
+  const DAY_ABBR = ["zo", "ma", "di", "wo", "do", "vr", "za"];
+  function fmtDate(iso) {
+    const d = new Date(iso + "T12:00:00");
+    return DAY_ABBR[d.getDay()] + " " + d.getDate() + " " +
+      d.toLocaleDateString("nl-NL", { month: "short" }).replace(".", "");
+  }
+  function periodeTekst(v) {
+    if (v.van === v.tot) return fmtDate(v.van);
+    return fmtDate(v.van) + " t/m " + fmtDate(v.tot);
+  }
   fetch(LEAVE_API)
     .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
     .then((data) => {
-      const h2 = document.createElement("h2");
-      h2.textContent = "Vakantie de komende dagen";
-      leaveEl.appendChild(h2);
-      const dagenMetVerlof = (data.dagen || []).filter((d) => d.afwezig && d.afwezig.length > 0);
-      if (dagenMetVerlof.length === 0) {
-        const empty = document.createElement("p");
-        empty.className = "empty";
-        empty.textContent = "Niemand vakantie in de komende 5 werkdagen";
-        leaveEl.appendChild(empty);
-        return;
-      }
-      dagenMetVerlof.forEach((d) => {
-        const row = document.createElement("div");
-        row.className = "leave-day";
-        const dateEl = document.createElement("span");
-        dateEl.className = "leave-date";
-        const datum = new Date(d.datum + "T12:00:00");
-        const fmt = datum.toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
-        dateEl.textContent = (d.vandaag ? "vandaag" : d.weekdag) + " " + fmt;
-        row.appendChild(dateEl);
-        const names = document.createElement("span");
-        names.className = "leave-names";
-        d.afwezig.forEach((a) => {
-          const chip = document.createElement("span");
-          chip.className = "leave-chip" + (a.dagdeel !== "hele dag" ? " half" : "");
-          const small = document.createElement("small");
-          small.textContent = " (" + a.dagdeel + ")";
-          chip.textContent = a.voornaam;
-          chip.appendChild(small);
-          names.appendChild(chip);
+      const personen = data.personen || [];
+      if (personen.length === 0) return; // niets te melden: kaart weglaten
+      const card = document.createElement("div");
+      card.className = "leave-card";
+      const icon = document.createElement("span");
+      icon.className = "icon";
+      icon.textContent = "\ud83c\udfd6\ufe0f";
+      const info = document.createElement("span");
+      info.className = "info";
+      const name = document.createElement("span");
+      name.className = "name";
+      name.textContent = "Vakantie";
+      info.appendChild(name);
+      const rows = document.createElement("span");
+      rows.className = "rows";
+      personen.forEach((p) => {
+        p.vakanties.forEach((v) => {
+          const row = document.createElement("span");
+          row.className = "leave-row";
+          let tekst = periodeTekst(v);
+          if (v.halve_dagen && v.halve_dagen.length > 0) {
+            const delen = v.halve_dagen.map((h) => h.dagdeel).join("/");
+            tekst += " \u2013 alleen " + delen;
+          }
+          const b = document.createElement("b");
+          b.textContent = p.voornaam;
+          row.appendChild(b);
+          row.appendChild(document.createTextNode(" (" + tekst + ")"));
+          rows.appendChild(row);
         });
-        row.appendChild(names);
-        leaveEl.appendChild(row);
       });
+      info.appendChild(rows);
+      card.appendChild(icon);
+      card.appendChild(info);
+      leaveEl.appendChild(card);
     })
     .catch(() => {
-      // Endpoint onbereikbaar of niet geconfigureerd: niets tonen.
+      // Endpoint onbereikbaar: niets tonen.
     });
 
   APPS.forEach((group, gi) => {
