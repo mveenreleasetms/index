@@ -113,6 +113,38 @@
   }
   .week-item.celebrate-today { border-color: var(--accent); }
   .week-item .when { color: var(--muted); font-size: .85rem; }
+  #leave { margin-top: 1.5rem; }
+  #leave h2 {
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted);
+    margin-bottom: .8rem;
+  }
+  .leave-day {
+    display: flex;
+    align-items: baseline;
+    gap: .75rem;
+    margin-bottom: .45rem;
+    font-size: .95rem;
+  }
+  .leave-day .leave-date { color: var(--muted); font-size: .85rem; min-width: 7.5rem; }
+  .leave-day .leave-names { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .leave-chip {
+    padding: .25rem .7rem;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-size: .9rem;
+  }
+  .leave-chip.half { border-style: dashed; }
+  .leave-chip small { color: var(--muted); font-size: .78rem; }
+  #leave .empty {
+    color: var(--muted); font-size: .9rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+  }
   #week .empty {
     color: var(--muted); font-size: .9rem;
     background: var(--card);
@@ -155,6 +187,7 @@
   </div>
   <p>Alle interne apps op één plek. Klik op een kaart.</p>
   <div id="week"></div>
+  <div id="leave"></div>
 </header>
 
 <div id="groups"></div>
@@ -162,7 +195,7 @@
 <footer>Dit zijn interne apps en alleen toegankelijk voor medewerkers vanuit kantoor of via VPN.</footer>
 
 <script>
-  const VERSION = "v1.1.0";
+  const VERSION = "v1.2.0";
   const RELEASED_AT = "2026-10-12 08:40";
 
   // ============================================================
@@ -355,6 +388,57 @@
       layer.appendChild(piece);
     }
   }
+
+  // ============================================================
+  // VERLOF: wie zijn er de komende 5 werkdagen vrij?
+  // Gegevens komen live uit de Verlof-app (token-beveiligd endpoint).
+  // Token aanpassen? HIERonder vervangen. Endpoint uit? Dan verdwijnt
+  // dit overzichtje geruisloos (er staat dan 'niet beschikbaar').
+  // ============================================================
+  const LEAVE_API =
+    "https://verlofrtms20260925.osc-fr1.scalingo.io/api/leave/upcoming?token=eRJ-d8c1qW9T_LJXq8aDJ9OdYRxK_pqqIScXALUV6r8";
+  const leaveEl = document.getElementById("leave");
+  fetch(LEAVE_API)
+    .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+    .then((data) => {
+      const h2 = document.createElement("h2");
+      h2.textContent = "Vakantie de komende dagen";
+      leaveEl.appendChild(h2);
+      const dagenMetVerlof = (data.dagen || []).filter((d) => d.afwezig && d.afwezig.length > 0);
+      if (dagenMetVerlof.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "Niemand vakantie in de komende 5 werkdagen";
+        leaveEl.appendChild(empty);
+        return;
+      }
+      dagenMetVerlof.forEach((d) => {
+        const row = document.createElement("div");
+        row.className = "leave-day";
+        const dateEl = document.createElement("span");
+        dateEl.className = "leave-date";
+        const datum = new Date(d.datum + "T12:00:00");
+        const fmt = datum.toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+        dateEl.textContent = (d.vandaag ? "vandaag" : d.weekdag) + " " + fmt;
+        row.appendChild(dateEl);
+        const names = document.createElement("span");
+        names.className = "leave-names";
+        d.afwezig.forEach((a) => {
+          const chip = document.createElement("span");
+          chip.className = "leave-chip" + (a.dagdeel !== "hele dag" ? " half" : "");
+          const small = document.createElement("small");
+          small.textContent = " (" + a.dagdeel + ")";
+          chip.textContent = a.voornaam;
+          chip.appendChild(small);
+          names.appendChild(chip);
+        });
+        row.appendChild(names);
+        leaveEl.appendChild(row);
+      });
+    })
+    .catch(() => {
+      // Endpoint onbereikbaar of niet geconfigureerd: niets tonen.
+    });
 
   APPS.forEach((group, gi) => {
     const section = document.createElement("section");
