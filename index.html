@@ -416,8 +416,18 @@
       info.appendChild(name);
       const rows = document.createElement("span");
       rows.className = "rows";
+      const entries = [];
       personen.forEach((p) => {
         p.vakanties.forEach((v) => {
+          entries.push({ voornaam: p.voornaam, vakantie: v });
+        });
+      });
+      entries.sort((a, b) =>
+        a.vakantie.van < b.vakantie.van ? -1 :
+        a.vakantie.van > b.vakantie.van ? 1 :
+        a.voornaam.localeCompare(b.voornaam, "nl")
+      );
+      entries.forEach(({ voornaam, vakantie: v }) => {
           const row = document.createElement("span");
           row.className = "leave-row";
           let tekst = periodeTekst(v);
@@ -426,11 +436,10 @@
             tekst += " \u2013 alleen " + delen;
           }
           const b = document.createElement("b");
-          b.textContent = p.voornaam;
+          b.textContent = voornaam;
           row.appendChild(b);
           row.appendChild(document.createTextNode(" (" + tekst + ")"));
           rows.appendChild(row);
-        });
       });
       info.appendChild(rows);
       card.appendChild(icon);
