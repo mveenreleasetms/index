@@ -330,11 +330,11 @@
     .sort((a, b) => a.date - b.date);
 
   const weekEl = document.getElementById("week");
-  const weekTitle = document.createElement("h2");
-  weekTitle.textContent = "Deze week";
-  weekEl.appendChild(weekTitle);
 
   if (upcoming.length > 0) {
+    const weekTitle = document.createElement("h2");
+    weekTitle.textContent = "Deze week";
+    weekEl.appendChild(weekTitle);
     const card = document.createElement("div");
     card.className = "week-card";
     upcoming.forEach((ev) => {
@@ -353,11 +353,6 @@
       card.appendChild(item);
     });
     weekEl.appendChild(card);
-  } else {
-    const empty = document.createElement("p");
-    empty.className = "empty";
-    empty.textContent = "Geen verjaardagen of jubilea deze week";
-    weekEl.appendChild(empty);
   }
 
   const celebrateToday = upcoming.filter((ev) => ev.date.getTime() === today.getTime());
