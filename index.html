@@ -133,13 +133,12 @@
   .leave-card .name { font-weight: 600; font-size: 1.05rem; }
   .leave-card .rows { margin-top: .4rem; }
   .leave-row {
-    display: block;
     color: var(--muted);
     font-size: .9rem;
     line-height: 1.5;
-    margin-top: .15rem;
   }
   .leave-row b { color: var(--text); font-weight: 600; }
+  .leave-row + .leave-row::before { content: ", "; }
   #week .empty {
     color: var(--muted); font-size: .9rem;
     background: var(--card);
@@ -417,7 +416,7 @@
       info.className = "info";
       const name = document.createElement("span");
       name.className = "name";
-      name.textContent = "Vakantie";
+      name.textContent = "Geplande vrije dagen";
       info.appendChild(name);
       const rows = document.createElement("span");
       rows.className = "rows";
